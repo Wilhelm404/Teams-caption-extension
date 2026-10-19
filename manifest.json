@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Teams Live Caption Capture",
+  "version": "2.0",
+  "description": "Capture and save live captions from Microsoft Teams meetings with timestamps",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://teams.microsoft.com/*",
+    "https://teams.cloud.microsoft/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://teams.microsoft.com/*",
+        "https://teams.cloud.microsoft/*"
+      ],
+      "js": ["capture.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Teams Live Caption Capture"
+  },
+  "icons": {
+    "32": "img/icon32.png",
+    "48": "img/icon48.png",
+    "128": "img/icon128.png"
+  }
+}

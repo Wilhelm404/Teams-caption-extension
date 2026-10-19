@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teams Caption Capture</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            width: 320px;
+            padding: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1b1b2f;
+            color: #e0e0e0;
+            font-size: 13px;
+        }
+
+        h2 {
+            margin-bottom: 14px;
+            font-size: 16px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #f44336;
+            display: inline-block;
+            flex-shrink: 0;
+            transition: background 0.3s;
+        }
+        .status-dot.active { background: #4caf50; box-shadow: 0 0 6px #4caf50; }
+
+        .section {
+            margin-bottom: 14px;
+            padding: 12px;
+            background: #23234a;
+            border-radius: 10px;
+            border: 1px solid #2e2e5a;
+        }
+
+        .section-title {
+            margin-bottom: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #8b8bb5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #b0b0cc;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 8px 10px;
+            background: #1a1a3e;
+            border: 1px solid #3d3d6e;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="number"]:focus { border-color: #7c5cbf; }
+        input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-row { display: flex; gap: 8px; margin-top: 8px; }
+
+        button {
+            flex: 1;
+            padding: 9px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-start  { background: #4caf50; color: #fff; }
+        .btn-start:hover:not(:disabled)  { background: #45a049; }
+        .btn-stop   { background: #f44336; color: #fff; }
+        .btn-stop:hover:not(:disabled)   { background: #d32f2f; }
+        .btn-dl     { background: #7c5cbf; color: #fff; }
+        .btn-dl:hover:not(:disabled)     { background: #6a4dab; }
+        .btn-capture{ background: #3a3a6e; color: #e0e0e0; border: 1px solid #4a4a80; }
+        .btn-capture:hover:not(:disabled){ background: #4a4a80; }
+        .btn-clear  { background: transparent; color: #f44336; border: 1px solid #f44336; }
+        .btn-clear:hover:not(:disabled)  { background: #f4433622; }
+
+        .stats { display: flex; justify-content: space-around; margin-top: 8px; }
+        .stat { text-align: center; }
+        .stat .val { font-size: 22px; font-weight: 700; color: #fff; }
+        .stat .lbl { font-size: 10px; color: #8b8bb5; text-transform: uppercase; }
+
+        .shortcuts { font-size: 11px; line-height: 1.9; color: #999; }
+        .shortcuts kbd {
+            display: inline-block;
+            padding: 1px 6px;
+            background: #2e2e5a;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 11px;
+            color: #ccc;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #2e2e5a;
+            font-size: 12px;
+            color: #b0b0cc;
+            cursor: pointer;
+        }
+        .toggle-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #7c5cbf;
+            cursor: pointer;
+        }
+
+        .footer {
+            font-size: 10px; color: #555; text-align: center; margin-top: 10px;
+        }
+
+        .hint {
+            font-size: 11px; color: #f4a236; margin-top: 6px; display: none;
+        }
+        .hint.show { display: block; }
+    </style>
+</head>
+<body>
+    <h2>
+        <span id="statusDot" class="status-dot"></span>
+        <span>Teams Caption Capture</span>
+    </h2>
+
+    <div id="noTeamsHint" class="hint show">
+        Open a Teams meeting in this tab to start capturing.
+    </div>
+
+    <div class="section">
+        <div class="section-title">Settings</div>
+        <label for="captureInterval">Capture Interval (seconds)</label>
+        <input type="number" id="captureInterval" value="10" min="3" max="60" step="1">
+        <div class="stats">
+            <div class="stat">
+                <div class="val" id="messageCount">0</div>
+                <div class="lbl">Captured</div>
+            </div>
+            <div class="stat">
+                <div class="val" id="captureState">—</div>
+                <div class="lbl">Status</div>
+            </div>
+        </div>
+        <label class="toggle-row">
+            <span>Auto-enable live captions</span>
+            <input type="checkbox" id="autoEnableToggle" checked>
+        </label>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Controls</div>
+        <div class="btn-row">
+            <button id="startBtn" class="btn-start">Start</button>
+            <button id="stopBtn" class="btn-stop">Stop</button>
+        </div>
+        <div class="btn-row">
+            <button id="captureNowBtn" class="btn-capture">Capture Now</button>
+            <button id="clearBtn" class="btn-clear">Clear All</button>
+        </div>
+        <div class="btn-row">
+            <button id="downloadBtn" class="btn-dl">Download Transcript</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Shortcuts</div>
+        <div class="shortcuts">
+            <div><kbd>Alt</kbd> + <kbd>D</kbd> Download transcript</div>
+            <div><kbd>Alt</kbd> + <kbd>C</kbd> Clear all captions</div>
+            <div><kbd>Alt</kbd> + <kbd>S</kbd> Force capture now</div>
+            <div><kbd>Alt</kbd> + <kbd>E</kbd> Try enable captions</div>
+        </div>
+    </div>
+
+    <div class="footer">v2.0 · All data stays local</div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
